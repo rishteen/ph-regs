@@ -7,7 +7,18 @@ from django.urls import reverse
 
 @admin.register(models.License_Type)
 class LicenseTypeAdmin(admin.ModelAdmin):
-    list_display = ['title', 'remarks']
+    list_display = ['title', 'remarks', 'get_num_employees']
+
+    def get_num_employees(self, obj):
+        url = (
+            reverse('admin:mis_employee_changelist')
+            + '?'
+            + urlencode({
+                'license_type__id': str(obj.id)
+            }))
+        return format_html('<a href="{}">{}</a>', url, obj.employee_set.count())
+
+    get_num_employees.short_description = 'تعداد کارمندان'
 
 
 @admin.register(models.Address)
@@ -57,7 +68,7 @@ class AttachmentInline(admin.TabularInline):
 
     def thumbnail(self, instance):
         if instance.document.name != '':
-            return format_html(f'<img src="{instance.document.url}" class="thumbnail" />')
+            return format_html(f'<img src="{instance.document.url}" class="thumbnail" width="100px;" />')
         return ''
 
     def save_model(self, request, obj, form, change):
@@ -89,7 +100,7 @@ class EmployeeAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
-    list_display = ('name', 'last_name', 'organization',
+    list_display = ('name', 'last_name', 'organization', 'license_type',
                     'status', 'created_at', 'updated_at')
     search_fields = ['name', 'last_name', 'organization__name']
     readonly_fields = ('created_by', 'updated_by', 'created_at', 'updated_at')
