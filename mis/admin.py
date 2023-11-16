@@ -1,6 +1,7 @@
 from django.contrib import admin
 from . import models
-from django.utils.html import format_html
+from django.utils.html import format_html, urlencode
+from django.urls import reverse
 # Register your models here.
 
 
@@ -18,10 +19,21 @@ class AddressAdmin(admin.ModelAdmin):
 
 @admin.register(models.Organization)
 class OrganizationAdmin(admin.ModelAdmin):
-    list_display = ['name', 'owner_name',
+    list_display = ['name', 'owner_name', 'get_num_employees',
                     'address', 'created_by', 'created_at']
-    fields = ['name', 'owner_name', 'owner_father_name',
-              'owner_grand_father_name', 'owner_tazkira_number', 'address', 'contact', 'remarks']
+    fields = ['name', 'owner_name', 'owner_father_name', 'owner_grand_father_name',
+              'owner_tazkira_number', 'address', 'contact', 'remarks']
+
+    def get_num_employees(self, obj):
+        url = (
+            reverse('admin:mis_employee_changelist')
+            + '?'
+            + urlencode({
+                'organization__id': str(obj.id)
+            }))
+        return format_html('<a href="{}">{}</a>', url, obj.employee_set.count())
+
+    get_num_employees.short_description = 'تعداد کارمندان'
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
