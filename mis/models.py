@@ -5,7 +5,7 @@ from django.utils import timezone
 # Create your models here.
 
 
-class License_Type(models.Model):
+class LicenseType(models.Model):
     title = models.CharField(max_length=255, verbose_name='نوعیت جواز')
     remarks = models.CharField(
         max_length=255, null=True, blank=True, default='ندارد', verbose_name='ملاحظات')
@@ -16,6 +16,61 @@ class License_Type(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class EducationalField(models.Model):
+    title = models.CharField(max_length=255, verbose_name='عنوان رشته')
+
+    class Meta:
+        verbose_name = 'رشته'
+        verbose_name_plural = 'رشته ها'
+
+    def __str__(self):
+        return self.title
+
+
+class EducationalDegree(models.Model):
+    title = models.CharField(max_length=255, verbose_name='عنوان')
+    remarks = models.TextField(blank=True, null=True, verbose_name='نوت')
+
+    class Meta:
+        verbose_name = 'نوع مدرک تحصیلی'
+        verbose_name_plural = 'انواع مدارک تحصیلی'
+
+    def __str__(self):
+        return self.title
+
+
+class EducationDetails(models.Model):
+    institute = models.CharField(max_length=255, verbose_name='مرجع')
+    field = models.ForeignKey(
+        EducationalField, on_delete=models.CASCADE, verbose_name='تخصصي څانګه')
+    year_of_graduation = models.DateField(verbose_name='د فراغت کال')
+    license_no = models.CharField(
+        max_length=255, verbose_name='د دیپلوم شمیره')
+    license_type_diplom = models.ForeignKey(
+        EducationalDegree, on_delete=models.CASCADE, verbose_name='دیپلوم')
+
+    class Meta:
+        verbose_name = 'تخصصي معلومات'
+        verbose_name_plural = 'تخصصي معلومات'
+
+    def __str__(self):
+        return f"{self.institute} | {self.license_no}"
+
+
+class Fees(models.Model):
+    title = models.CharField(max_length=255, verbose_name='دې فیس کتګوري')
+    price = models.PositiveIntegerField(verbose_name="بیه")
+    remarks = models.CharField(
+        max_length=255, verbose_name='نوټ', default='نلري')
+
+    class Meta:
+        verbose_name = 'د فیس بیه'
+        verbose_name_plural = 'د فیس بیه'
+
+    def __str__(self):
+        return f"{self.title}|{self.price}"
 
 
 class Address(models.Model):
@@ -56,7 +111,6 @@ class Address(models.Model):
         # add more choices here
     )
     DISTRICT_CHOICES = (
-
         ('1', 'ناحیه اول'),
         ('2', 'ناحیه دوم'),
         ('3', 'ناحیه سوم'),
@@ -91,9 +145,6 @@ class Address(models.Model):
     avenue = models.CharField(
         max_length=255, verbose_name="کوچه", default='ندارد')
 
-    def __str__(self):
-        return self.province + ' '+self.district
-
     class Meta:
         verbose_name = 'آدرس'
         verbose_name_plural = 'آدرس ها'
@@ -119,9 +170,9 @@ class Organization(models.Model):
     remarks = models.TextField(
         max_length=255, verbose_name='ملاحظات', default='null')
     created_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, related_name='payment_plans_payment_created', null=True, verbose_name="ایجاد شد")
+        User, on_delete=models.SET_NULL, related_name='organization_created', null=True, verbose_name="ایجاد شد")
     updated_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, related_name='payment_plans_payment_updated', null=True, verbose_name="تغییر شد")
+        User, on_delete=models.SET_NULL, related_name='organization_updated', null=True, verbose_name="تغییر شد")
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="زمان ایجاد", null=True)
     updated_at = models.DateTimeField(
@@ -135,45 +186,44 @@ class Organization(models.Model):
         return self.name
 
 
-class Educational_Degree(models.Model):
-    title = models.CharField(max_length=255, verbose_name='عنوان')
-    remarks = models.TextField(blank=True, null=True, verbose_name='نوت')
-
-    class Meta:
-        verbose_name = 'نوع مدرک تحصیلی'
-        verbose_name_plural = 'انواع مدارک تحصیلی'
-
-    def __str__(self):
-        return self.title
-
-
 class Employee(models.Model):
+    GENDER_CHOICES = (
+        ('Male', 'مرد'),
+        ('Female', 'زن'),
+        ('Other', 'دیگر')
+    )
+    NATIONALITY_CHOICES = (
+        ('Afghan', 'افغان'),
+        ('Khariji', 'خارجی')
+    )
     name = models.CharField(max_length=255, verbose_name="اسم")
     last_name = models.CharField(max_length=255, verbose_name="تخلص")
     father_name = models.CharField(max_length=255, verbose_name="ولد")
     grand_father_name = models.CharField(
         max_length=255, null=True, blank=True, default='خالی', verbose_name="ولدیت")
-    gender = models.CharField(max_length=10, choices=(
-        ('Male', 'مرد'), ('Female', 'زن'), ('Other', 'دیگر')), verbose_name="جنسیت")
-    nationaliy = models.CharField(max_length=10, choices=(
-        ('Afghan', 'افغان'), ('Khariji', 'خارجی')), verbose_name="ملیت")
+    gender = models.CharField(
+        max_length=10, choices=GENDER_CHOICES, verbose_name="جنسیت")
+    nationality = models.CharField(
+        max_length=10, choices=NATIONALITY_CHOICES, verbose_name="ملیت")
     id_no = models.CharField(max_length=20, unique=True,
                              verbose_name="تذکره / پاسپورت نمبر")
     current_address = models.ForeignKey(
-        Address, on_delete=models.CASCADE, related_name='customers_current', verbose_name="آدرس")
+        Address, on_delete=models.CASCADE, related_name='employees', verbose_name="آدرس")
     primary_phone = models.CharField(max_length=15, verbose_name="شماره تماس")
     secondary_phone = models.CharField(
         max_length=15, blank=True, null=True, verbose_name="شماره تماس دوم")
     organization = models.ForeignKey(
         Organization, on_delete=models.PROTECT, verbose_name='نهاد صحی')
     education = models.ForeignKey(
-        Educational_Degree, on_delete=models.PROTECT, verbose_name='سطح تحصیلی')
+        EducationDetails, on_delete=models.PROTECT, verbose_name='سطح تحصیلی')
     license_type = models.ForeignKey(
-        License_Type, on_delete=models.PROTECT, verbose_name='نوعیت جواز')
+        LicenseType, on_delete=models.PROTECT, verbose_name='نوعیت جواز')
+    fees = models.ForeignKey(
+        Fees, on_delete=models.CASCADE, verbose_name='تعیین شوۍ فیس')
     license_number = models.CharField(
         max_length=20, verbose_name='شماره جواز', unique=True)
-    license_issue_date = models.DateField()
-    license_expiry_date = models.DateField()
+    license_issue_date = models.DateField(verbose_name="تاریخ صدور جواز")
+    license_expiry_date = models.DateField(verbose_name="تاریخ انقضای جواز")
     status = models.BooleanField(default=True, verbose_name="فعال/غیر فعال")
     qr_code = models.ImageField(
         upload_to='qr_codes', blank=True, null=True, verbose_name="کیو ار کد")
@@ -181,10 +231,10 @@ class Employee(models.Model):
         upload_to='services/customer/images', blank=True, null=True, verbose_name="عکس")
     remarks = models.TextField(
         blank=True, null=True, verbose_name="ملاحظات", default='ملاحظه ای ندارد!')
-    created_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, related_name='employee_created', null=True, verbose_name="ایجاد شد")
-    updated_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, related_name='employee_updated', null=True, verbose_name="تغییر شد")
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                   related_name='employee_created', null=True, verbose_name="ایجاد شد")
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL,
+                                   related_name='employee_updated', null=True, verbose_name="تغییر شد")
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="زمان ایجاد", null=True)
     updated_at = models.DateTimeField(
@@ -192,7 +242,7 @@ class Employee(models.Model):
 
     class Meta:
         verbose_name = 'کدر صحی'
-        verbose_name_plural = ' کدر ها'
+        verbose_name_plural = 'کدر ها'
 
     def __str__(self):
         return f"{self.name} - {self.last_name} - {self.organization}"
@@ -201,7 +251,7 @@ class Employee(models.Model):
 class Attachment(models.Model):
     name = models.CharField(max_length=255, verbose_name='عنوان')
     employee = models.ForeignKey(
-        Employee, on_delete=models.CASCADE, related_name='images', verbose_name='سند')
+        Employee, on_delete=models.CASCADE, related_name='attachments', verbose_name='سند')
     document = models.FileField(upload_to='attachment/files')
     uploaded_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='ایجاد شد')

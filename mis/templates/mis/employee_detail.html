@@ -1,0 +1,181 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جواز شماره {{ employee.license_number }}</title>
+    <style>
+        @font-face {
+            font-family: 'bnazanin';
+            src: url("{% static 'fonts/bnazanin.ttf' %}") format('truetype');
+        }
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+        }
+        body {
+            font-family: 'bnazanin', sans-serif, 'Times New Roman', Times, serif;
+            direction: rtl;
+            padding: 40px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+        .header .photo {
+            width: 3cm;
+            height: 4cm;
+
+        }
+        .header .title {
+            flex: 1;
+            text-align: center;
+        }
+        .header .info {
+            text-align: right;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px;
+            border: 4px solid black;
+            margin-top: 0%;
+        }
+        .table-container {
+            margin: 10px;
+            flex: 1;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: right;
+            width: 50%;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        p {
+            margin: 0;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="info">
+        <p style="font-weight: bold;">د صدور شمیره: {{ employee.license_number }}</p>
+        <p style="font-weight: bold;">د صدور نیته: {{ employee.license_issue_date|date:"d-m-yy" }}</p>
+        <p style="font-weight: bold;">د پای نیته: {{ employee.license_expiry_date|date:"d-m-yy" }}</p></p>
+    </div>
+    <div class="title">
+        <h1>جواز فعالیت پرسنل طبی</h1>
+    </div>
+    <div class="photo">
+    </div>
+</div>
+
+<div class="container">
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>نوم او تخلص</th>
+                <td>{{ employee.name }} {{ employee.last_name }}</td>
+            </tr>
+            <tr>
+                <th>د پلار نوم</th>
+                <td>{{ employee.father_name }}</td>
+            </tr>
+            <tr>
+                <th>د نیکه نوم</th>
+                <td>{{ employee.grand_father_name }}</td>
+            </tr>
+            <tr>
+                <th>د تذکره شمیره</th>
+                <td>{{ employee.id_no }}</td>
+            </tr>
+            <tr>
+                <th>د ‌تماس شمیره</th>
+                <td>{{ employee.primary_phone }}</td>
+            </tr>
+            <tr>
+                <th>مربوطه رشته</th>
+                <td>{{employee.education.field}}</td>
+            </tr>
+        </table>
+    </div>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>د فراغت کال او مرجع</th>
+                <td>{{ employee.education.year_of_graduation|date:"yy-m-d" }}</td>
+            </tr>
+            <tr>
+                <th>دیپلوم</th>
+                <td>{{employee.education.license_type_diplom}} {{employee.education.institute}}</th>
+            </tr>
+            <tr>
+                <th>تخصصي څانګه د دیپلوم شمیره</th>
+                <td>{{employee.education.license_no}}</td>
+            </tr>
+            <tr>
+                <th>دندې ځای</th>
+                <td>{{employee.organization}}</td>
+            </tr>
+            <tr>
+                <th>د کتنځی موقعیت</th>
+                <td>{{employee.organization.address}}</td>
+            </tr>
+            <tr>
+                <th>تعیین شوۍ فیس</th>
+                <td>{{employee.fees}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<p>
+    زه () د() زوی ژمنه کوم, چې درسمیاتو وروسته به دروغتیا سکتور به خصوصی برخه کې د خپل ولس د ژوند روغتیا او سلامتی لپاره خدمت ترسره کومَ خپل جواز د مالیی په اداء کولو سره تمدیدوم او ناروغانو ته د خدمت پر وخت به د سپینی چپنی اغوستلو اهتمام کوم.
+</p>
+
+<div class="header">
+
+    <div class="title">
+        <b>
+        ترتیب کونکی:
+        <br>
+        خصوصی کتنځایونو د جواز مدیر
+        </b>
+    </div>
+    <div class="title">
+        <b>
+            د خصوصی روغتیایی<br>
+            سکتور د تاسیساتو د پلتنی عمومی مدیر
+        </b>
+    </div>
+    <div class="title" style="border: 4px solid black;height: 3cm;">
+        نمونه مهر
+    </div>
+    <div class="title">
+        <b>
+            د دولتی او خصوصی روغتیایی <br>
+            سکتور د تاسیساتو آمر
+        </b>
+    </div>
+    <div class="title">
+        <b>
+        د صحی قوانینو د تطبیق او پلتنی<br>
+        ریئس
+        </b>
+    </div>
+
+</div>
+</body>
+</html>
